@@ -199,7 +199,9 @@ class MedicalImageViewerApp:
             return
 
         try:
-            self.segmented_mask = exploration_segmentation(self.image_data, self.label_data, self.current_slice, self.tolerance, self.filter_size, self.max_voxel_exploration)
+            slice_data = self.image_data[:, :, self.current_slice]
+            label_slice = self.label_data[:, :, self.current_slice]
+            self.segmented_mask = exploration_segmentation(slice_data, label_slice, self.tolerance, self.filter_size, self.max_voxel_exploration)
         except ValueError as e:
             messagebox.showerror("Errore", str(e))
             return

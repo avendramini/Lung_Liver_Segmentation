@@ -193,12 +193,13 @@ class MedicalImageViewerApp:
         confirm_button.grid(row=2, column=0, columnspan=3)
 
     def perform_segmentation(self):
-        if self.image_data is None or self.label_data is None:
+        if self.image_data is None:
             messagebox.showerror("Errore", "Carica sia l'immagine che il target label prima di segmentare.")
             return
 
         try:
-            self.segmented_mask = watershed_segmentation(self.image_data, self.label_data, self.current_slice, self.tolerance, self.filter_size)
+            slice_data = self.image_data[:, :, self.current_slice]
+            self.segmented_mask = watershed_segmentation(slice_data, self.tolerance, self.filter_size)
         except ValueError as e:
             messagebox.showerror("Errore", str(e))
             return

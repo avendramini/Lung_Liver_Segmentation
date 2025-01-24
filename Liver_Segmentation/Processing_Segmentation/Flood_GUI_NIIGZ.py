@@ -227,7 +227,9 @@ class MedicalImageViewerApp:
             return
 
         try:
-            self.segmented_mask = flood_segmentation(self.image_data, self.label_data, self.current_slice, self.tolerance_flood, self.tolerance_boundaries, self.filter_size, self.range_min, self.range_max)
+            slice_data = self.image_data[:, :, self.current_slice]
+            label_slice = self.label_data[:, :, self.current_slice]
+            self.segmented_mask = flood_segmentation(slice_data, label_slice, self.tolerance_flood, self.tolerance_boundaries, self.filter_size, self.range_min, self.range_max)
         except ValueError as e:
             messagebox.showerror("Errore", str(e))
             return

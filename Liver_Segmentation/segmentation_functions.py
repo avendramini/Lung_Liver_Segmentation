@@ -5,9 +5,9 @@ from skimage.morphology import binary_dilation
 import cv2
 from collections import deque
 
-def watershed_segmentation(image_data, label_data, current_slice, tolerance, filter_size):
+def watershed_segmentation(slice_data, tolerance=(90, 200), filter_size=4):
     # Filtro mediano
-    filtered_image = median_filter(image_data[:,:,current_slice], size=filter_size)
+    filtered_image = median_filter(slice_data, size=filter_size)
 
     # Crea una maschera con 1 solo nei pixel nel range di tolleranza
     mask = (filtered_image >= tolerance[0]) & (filtered_image <= tolerance[1])
@@ -52,14 +52,14 @@ def watershed_segmentation(image_data, label_data, current_slice, tolerance, fil
 
     return filled_mask
 
-def exploration_segmentation(image_data, label_data, current_slice, tolerance, filter_size, max_voxel_exploration):
+def exploration_segmentation(slice_data, label_slice, tolerance=(90, 200), filter_size=4, max_voxel_exploration=100000):
     # Filtro mediano
-    filtered_image = median_filter(image_data[:,:,current_slice], size=filter_size)
+    filtered_image = median_filter(slice_data, size=filter_size)
     mask2 = (filtered_image > tolerance[0]) & (filtered_image < tolerance[1])
 
     # BFS per propagare la maschera
-    new_mask = np.zeros_like(image_data[:,:,current_slice], dtype=np.uint8)
-    vis = np.zeros_like(image_data[:,:,current_slice], dtype=bool)
+    new_mask = np.zeros_like(slice_data, dtype=np.uint8)
+    vis = np.zeros_like(slice_data, dtype=bool)
 
     def bfs(x, y, vis):
         queue = deque([(x, y)])
@@ -75,7 +75,7 @@ def exploration_segmentation(image_data, label_data, current_slice, tolerance, f
             cx, cy = queue.popleft()
             for dx, dy in directions:
                 nx, ny = cx + dx, cy + dy
-                if (0 <= nx < image_data.shape[0] and 0 <= ny < image_data.shape[1] and not vis[nx, ny] and
+                if (0 <= nx < slice_data.shape[0] and 0 <= ny < slice_data.shape[1] and not vis[nx, ny] and
                     tolerance[0] <= filtered_image[nx, ny] <= tolerance[1]):
                     vis[nx, ny] = True
                     new_mask[nx, ny] = 1
@@ -83,7 +83,7 @@ def exploration_segmentation(image_data, label_data, current_slice, tolerance, f
                     explored_voxels += 1
 
     # Select a random seed point from the true label mask (red one)
-    seed_points = np.array(np.where(label_data[:,:,current_slice])).T
+    seed_points = np.array(np.where(label_slice)).T
     
     if len(seed_points) == 0:
         raise ValueError("Nessun seed point trovato nella maschera vera.")
@@ -93,9 +93,9 @@ def exploration_segmentation(image_data, label_data, current_slice, tolerance, f
 
     return new_mask
 
-def flood_segmentation(image_data, label_data, current_slice, tolerance_flood, tolerance_boundaries, filter_size, range_min, range_max):
+def flood_segmentation(slice_data, label_slice, tolerance_flood=50, tolerance_boundaries=50, filter_size=4, range_min=90, range_max=200):
     # Applica il filtro per impostare i pixel fuori dal range a -1000
-    filtered_image = np.where((image_data[:,:,current_slice] >= range_min) & (image_data[:,:,current_slice] <= range_max), image_data[:,:,current_slice], -1000)
+    filtered_image = np.where((slice_data >= range_min) & (slice_data <= range_max), slice_data, -1000)
 
     # Standardizza dopo il filtro nel range [-1000, 3000]
     standardized_filtered_image = (filtered_image - np.min(filtered_image)) / (np.max(filtered_image) - np.min(filtered_image)) * 4000 - 1000
@@ -112,10 +112,10 @@ def flood_segmentation(image_data, label_data, current_slice, tolerance_flood, t
     exclusion_mask = binary_dilation(boundaries)
 
     # Flood fill per propagare la maschera senza oltrepassare i contorni
-    new_mask = np.zeros_like(image_data[:,:,current_slice], dtype=np.uint8)
+    new_mask = np.zeros_like(slice_data, dtype=np.uint8)
 
     # Select a random seed point from the true label mask (red one)
-    seed_points = np.array(np.where(label_data[:,:,current_slice])).T
+    seed_points = np.array(np.where(label_slice)).T
     
     if len(seed_points) == 0:
         raise ValueError("Nessun seed point trovato nella maschera vera.")
