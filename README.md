@@ -7,8 +7,8 @@ This project was developed as part of the Signal, Image, and Video course for th
 ### Using Conda
 1. Clone the repository:
    ```bash
-   git clone <repository-URL>
-   cd <repository-name>
+   git clone https://github.com/avendramini/Lung_Liver_Segmentation.git
+   cd Lung_Liver_Segmentation
    ```
 2. Create the environment:
    ```bash
@@ -22,8 +22,8 @@ This project was developed as part of the Signal, Image, and Video course for th
 ### Using Pip
 1. Clone the repository:
    ```bash
-   git clone <repository-URL>
-   cd <repository-name>
+   git clone (https://github.com/avendramini/Lung_Liver_Segmentation.git)
+   cd Lung_Liver_Segmentation
    ```
 2. Create a virtual environment:
    ```bash
