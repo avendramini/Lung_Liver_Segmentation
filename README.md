@@ -16,7 +16,7 @@ This project was developed as part of the Signal, Image, and Video course for th
    ```
 3. Activate the environment:
    ```bash
-   conda activate <environment-name>
+   conda activate siv
    ```
 
 ### Using Pip
