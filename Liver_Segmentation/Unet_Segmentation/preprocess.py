@@ -30,11 +30,11 @@ def prepare(in_dir, pixdim=(1.5, 1.5, 1.0), a_min=-200, a_max=200, spatial_size=
 
     set_determinism(seed=0)
 
-    path_train_volumes = sorted(glob(os.path.join(in_dir, "TrainVolumes", "*.nii.gz")))
-    path_train_segmentation = sorted(glob(os.path.join(in_dir, "TrainSegmentation", "*.nii.gz")))
+    path_train_volumes = sorted(glob(os.path.join(in_dir, "TrainVolumes_splitted", "*.nii.gz")))
+    path_train_segmentation = sorted(glob(os.path.join(in_dir, "TrainSegmentation_splitted", "*.nii.gz")))
 
-    path_test_volumes = sorted(glob(os.path.join(in_dir, "TestVolumes", "*.nii.gz")))
-    path_test_segmentation = sorted(glob(os.path.join(in_dir, "TestSegmentation", "*.nii.gz")))
+    path_test_volumes = sorted(glob(os.path.join(in_dir, "TestVolumes_splitted", "*.nii.gz")))
+    path_test_segmentation = sorted(glob(os.path.join(in_dir, "TestSegmentation_splitted", "*.nii.gz")))
 
     train_files = [{"vol": image_name, "seg": label_name} for image_name, label_name in
                    zip(path_train_volumes, path_train_segmentation)]
