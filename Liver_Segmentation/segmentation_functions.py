@@ -61,8 +61,11 @@ def exploration_segmentation(slice_data, label_slice, tolerance=(90, 200), filte
     new_mask = np.zeros_like(slice_data, dtype=np.uint8)
     vis = np.zeros_like(slice_data, dtype=bool)
 
-    def bfs(x, y, vis):
-        queue = deque([(x, y)])
+    def bfs(seeds, vis):
+        queue = deque()
+        for seed in seeds:
+            x, y = seed
+            queue.append((x, y))
         vis[x, y] = True
         new_mask[x, y] = 1
         directions = [(1, 0), (-1, 0), (0, 1), (0, -1)]
@@ -76,7 +79,7 @@ def exploration_segmentation(slice_data, label_slice, tolerance=(90, 200), filte
             for dx, dy in directions:
                 nx, ny = cx + dx, cy + dy
                 if (0 <= nx < slice_data.shape[0] and 0 <= ny < slice_data.shape[1] and not vis[nx, ny] and
-                    tolerance[0] <= filtered_image[nx, ny] <= tolerance[1]):
+                    mask2[nx, ny]):
                     vis[nx, ny] = True
                     new_mask[nx, ny] = 1
                     queue.append((nx, ny))
@@ -88,22 +91,46 @@ def exploration_segmentation(slice_data, label_slice, tolerance=(90, 200), filte
     if len(seed_points) == 0:
         raise ValueError("Nessun seed point trovato nella maschera vera.")
 
-    random_seed = seed_points[np.random.choice(seed_points.shape[0])]
-    bfs(random_seed[0], random_seed[1], vis)
+    random_seeds =[]
+    for i in range(3):
+        random_seeds.append(seed_points[np.random.choice(seed_points.shape[0])])
+    bfs(random_seeds, vis)
+    """# Chiudi tutti i buchi nella maschera finale
+    import matplotlib.pyplot as plt
 
-    return new_mask
+    # Plot the original slice data
+    plt.figure(figsize=(12, 6))
+    plt.subplot(1, 3, 1)
+    plt.title("Original Slice Data")
+    plt.imshow(slice_data, cmap='gray')
+    plt.axis('off')
 
-def flood_segmentation(slice_data, label_slice, tolerance_flood=50, tolerance_boundaries=50, filter_size=4, range_min=90, range_max=200):
-    # Applica il filtro per impostare i pixel fuori dal range a -1000
-    filtered_image = np.where((slice_data >= range_min) & (slice_data <= range_max), slice_data, -1000)
+    # Plot the mask before filling holes
+    plt.subplot(1, 3, 2)
+    plt.title("Mask Before Filling Holes")
+    plt.imshow(new_mask, cmap='gray')
+    plt.axis('off')"""
 
-    # Standardizza dopo il filtro nel range [-1000, 3000]
-    standardized_filtered_image = (filtered_image - np.min(filtered_image)) / (np.max(filtered_image) - np.min(filtered_image)) * 4000 - 1000
+    # Chiudi tutti i buchi nella maschera finale
+    filled_mask = binary_fill_holes(new_mask)
 
-    # Filtro mediano
-    filtered_image = median_filter(standardized_filtered_image, size=filter_size)
+    # Plot the filled mask
+    """plt.subplot(1, 3, 3)
+    plt.title("Filled Mask After Segmentation")
+    plt.imshow(filled_mask, cmap='gray')
+    plt.axis('off')
 
-    mask2 = filtered_image > tolerance_boundaries
+    plt.show()"""
+    return filled_mask
+    
+
+def flood_segmentation(slice_data, label_slice, tolerance=(90, 200), tolerance_flood=30, filter_size=4):
+
+    filtered_image = median_filter(slice_data, size=filter_size)
+
+    filtered_image = np.where((filtered_image >= tolerance[0]) & (filtered_image <= tolerance[1]), filtered_image, -1000)
+
+    mask2 = (filtered_image >= tolerance[0]) & (filtered_image <= tolerance[1])
 
     # Trova i contorni
     boundaries = find_boundaries(mask2, mode='inner')

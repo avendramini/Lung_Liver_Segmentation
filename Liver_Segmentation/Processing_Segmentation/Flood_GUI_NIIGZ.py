@@ -35,11 +35,9 @@ class MedicalImageViewerApp:
         self.segmented_mask = None
 
         # Parametri di segmentazione
-        self.tolerance_flood = 50  # Tolleranza predefinita per il flood
-        self.tolerance_boundaries = 50  # Tolleranza predefinita per i bordi
+        self.tolerance_flood = 30   # Tolleranza predefinita per il flood
+        self.tolerance = [90, 200]  # Tolleranza predefinita
         self.filter_size = 4  # Filtro mediano di dimensione predefinita
-        self.range_min = 90  # Minimo range per il filtro
-        self.range_max = 200  # Massimo range per il filtro
         self.max_voxel_exploration = 100000  # Limite massimo di voxel esplorabili
 
         # Inizializza la figura di matplotlib
@@ -180,12 +178,15 @@ class MedicalImageViewerApp:
         tolerance_flood_entry.insert(0, str(self.tolerance_flood))
         tolerance_flood_entry.grid(row=0, column=1)
 
-        # Parametri di tolleranza per i bordi
-        tolerance_boundaries_label = tk.Label(param_window, text="Tolleranza Bordi:")
-        tolerance_boundaries_label.grid(row=1, column=0)
-        tolerance_boundaries_entry = tk.Entry(param_window)
-        tolerance_boundaries_entry.insert(0, str(self.tolerance_boundaries))
-        tolerance_boundaries_entry.grid(row=1, column=1)
+        # Parametri di tolleranza
+        tolerance_label = tk.Label(param_window, text="Tolleranza (min, max):")
+        tolerance_label.grid(row=1, column=0)
+        min_tolerance_entry = tk.Entry(param_window)
+        min_tolerance_entry.insert(0, str(self.tolerance[0]))
+        min_tolerance_entry.grid(row=1, column=1)
+        max_tolerance_entry = tk.Entry(param_window)
+        max_tolerance_entry.insert(0, str(self.tolerance[1]))
+        max_tolerance_entry.grid(row=1, column=2)
 
         # Parametri filtro
         filter_label = tk.Label(param_window, text="Dimensione filtro mediano:")
@@ -194,32 +195,17 @@ class MedicalImageViewerApp:
         filter_size_entry.insert(0, str(self.filter_size))
         filter_size_entry.grid(row=2, column=1)
 
-        # Parametri range
-        range_min_label = tk.Label(param_window, text="Range Min:")
-        range_min_label.grid(row=3, column=0)
-        range_min_entry = tk.Entry(param_window)
-        range_min_entry.insert(0, str(self.range_min))
-        range_min_entry.grid(row=3, column=1)
-
-        range_max_label = tk.Label(param_window, text="Range Max:")
-        range_max_label.grid(row=4, column=0)
-        range_max_entry = tk.Entry(param_window)
-        range_max_entry.insert(0, str(self.range_max))
-        range_max_entry.grid(row=4, column=1)
-
         def update_parameters():
             try:
                 self.tolerance_flood = int(tolerance_flood_entry.get())
-                self.tolerance_boundaries = int(tolerance_boundaries_entry.get())
+                self.tolerance = [int(min_tolerance_entry.get()), int(max_tolerance_entry.get())]
                 self.filter_size = int(filter_size_entry.get())
-                self.range_min = int(range_min_entry.get())
-                self.range_max = int(range_max_entry.get())
                 param_window.destroy()
             except ValueError:
                 messagebox.showerror("Errore", "Inserisci valori numerici validi.")
 
         confirm_button = tk.Button(param_window, text="Conferma", command=update_parameters)
-        confirm_button.grid(row=5, column=0, columnspan=2)
+        confirm_button.grid(row=3, column=0, columnspan=3)
 
     def perform_segmentation(self):
         if self.image_data is None or self.label_data is None:
@@ -229,7 +215,7 @@ class MedicalImageViewerApp:
         try:
             slice_data = self.image_data[:, :, self.current_slice]
             label_slice = self.label_data[:, :, self.current_slice]
-            self.segmented_mask = flood_segmentation(slice_data, label_slice, self.tolerance_flood, self.tolerance_boundaries, self.filter_size, self.range_min, self.range_max)
+            self.segmented_mask = flood_segmentation(slice_data, label_slice, self.tolerance, self.tolerance_flood, self.filter_size)
         except ValueError as e:
             messagebox.showerror("Errore", str(e))
             return
