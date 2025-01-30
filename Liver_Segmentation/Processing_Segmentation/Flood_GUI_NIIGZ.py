@@ -1,22 +1,10 @@
-import os
 import numpy as np
 import tkinter as tk
 from tkinter import filedialog, messagebox, Toplevel
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from matplotlib.figure import Figure
 import nibabel as nib
-from scipy.ndimage import median_filter
-from collections import deque
-from skimage import morphology
 from matplotlib.colors import ListedColormap
-from skimage.segmentation import flood, find_boundaries
-from skimage.morphology import binary_dilation
-from scipy.ndimage import binary_fill_holes
-import matplotlib.pyplot as plt
-from skimage.exposure import rescale_intensity
-from sklearn.metrics import confusion_matrix
-import sys
-sys.path.append('..')
 from segmentation_functions import flood_segmentation
 
 class MedicalImageViewerApp:
@@ -35,7 +23,7 @@ class MedicalImageViewerApp:
         self.segmented_mask = None
 
         # Parametri di segmentazione
-        self.tolerance_flood = 30   # Tolleranza predefinita per il flood
+        self.tolerance_flood = 50   # Tolleranza predefinita per il flood
         self.tolerance = [90, 200]  # Tolleranza predefinita
         self.filter_size = 4  # Filtro mediano di dimensione predefinita
         self.max_voxel_exploration = 100000  # Limite massimo di voxel esplorabili

@@ -1,17 +1,10 @@
-import os
-import pydicom
 import numpy as np
 import tkinter as tk
 from tkinter import filedialog, messagebox, Toplevel
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from matplotlib.figure import Figure
 import nibabel as nib
-from scipy.ndimage import median_filter
-from collections import deque
-from skimage import morphology
 from matplotlib.colors import ListedColormap
-import sys
-sys.path.append('..')
 from segmentation_functions import exploration_segmentation
 
 class MedicalImageViewerApp:
