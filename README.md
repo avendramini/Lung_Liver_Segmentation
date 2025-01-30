@@ -3,7 +3,7 @@
 This project was developed as part of the Signal, Image, and Video course for the Master's Degree in Artificial Intelligence Systems at the University of Trento.
 The goal of this project is to perform segmentation of the lungs and liver in medical images using image analysis techniques.
 ## Lung Segmentation
-The Lung segmentation code is entirely available in the notebook [Lung_segmentation.ipynb](Lung_Segmentation/lung_.ipynb).
+The Lung segmentation code is entirely available in the notebook [Lung_segmentation.ipynb](Lung_Segmentation/lung_segmentation.ipynb).
 
 ## Liver Segmentation
 The Liver segmentation code is entirely available in the [Liver_Segmentation](Liver_Segmentation) folder.
