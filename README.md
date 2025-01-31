@@ -4,7 +4,8 @@ This project was developed as part of the Signal, Image, and Video course for th
 The goal of this project is to perform segmentation of the lungs and liver in medical images using image analysis techniques.
 ## Lung Segmentation
 The Lung segmentation code is entirely available in the notebook [Lung_segmentation.ipynb](Lung_Segmentation/lung_segmentation.ipynb).
-![3D Lungs](Miscellaneous/lungs.png)
+<img src="Miscellaneous/lungs.png" alt="3D Lungs" width="500"/>
+
 ## Liver Segmentation
 The Liver segmentation code is entirely available in the [Liver_Segmentation](Liver_Segmentation) folder.
 ### Exploration, Flood and Watershed approaches
