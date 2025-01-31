@@ -4,6 +4,7 @@ This project was developed as part of the Signal, Image, and Video course for th
 The goal of this project is to perform segmentation of the lungs and liver in medical images using image analysis techniques.
 ## Lung Segmentation
 The Lung segmentation code is entirely available in the notebook [Lung_segmentation.ipynb](Lung_Segmentation/lung_segmentation.ipynb).
+
 <img src="Miscellaneous/lungs.png" alt="3D Lungs" width="500"/>
 
 ## Liver Segmentation
@@ -14,6 +15,8 @@ The file [Segmentation_Functions.py](Liver_Segmentation/Processing_Segmentation/
 The file [Combined_Segmentation_GUI.py](Liver_Segmentation/Processing_Segmentation/Combined_Segmentation_GUI.py) is the code of a GUI for conducting segmentation.given a medical image.
 ### U-Net
 These approach's code is in the [Unet_Segmentation](Liver_Segmentation/Unet_Segmentation) folder.
+
+<img src="Miscellaneous/output.png" alt="Liver slice" width="1000"/>
 
 ## Installation
 
