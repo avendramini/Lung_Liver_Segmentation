@@ -51,6 +51,4 @@ These approach's code is in the [Unet_Segmentation](Liver_Segmentation/Unet_Segm
    pip install -r requirements.txt
    ```
 
-## Usage
-
 
