@@ -35,14 +35,15 @@ def watershed_segmentation(slice_data, tolerance=(90, 200), filter_size=4):
     markers[unknown == 255] = 0
     color_img = cv2.cvtColor(grayscale_image, cv2.COLOR_GRAY2BGR)
     markers = cv2.watershed(color_img, markers)
-    
+
+
     n_mark = np.max(markers)
 
     vettore_aree = [(np.sum(markers == i), i) for i in range(n_mark + 1)]
     coppia = max(vettore_aree, key=lambda x: x[0])
+    
     new_mask = np.ones(markers.shape)
     new_mask[markers == coppia[1]] = 0
-
     
     num_labels, labels_im = cv2.connectedComponents(new_mask.astype(np.uint8))
     sizes = np.bincount(labels_im.ravel())

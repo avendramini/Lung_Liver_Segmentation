@@ -32,8 +32,7 @@ class MedicalImageViewerApp:
         self.tolerance = [50,200]  # Tolleranza predefinita
         self.filter_size = 4         # Filtro mediano di dimensione predefinita
         self.max_voxel_exploration = 100000  # Limite massimo di voxel esplorabili
-        self.tolerance_flood = 50
-        self.tolerance_boundaries = 50
+        self.tolerance_flood = 30
 
         # Inizializza la figura di matplotlib
         self.figure = Figure(figsize=(6, 6))
@@ -205,16 +204,24 @@ class MedicalImageViewerApp:
         filter_size_entry.insert(0, str(self.filter_size))
         filter_size_entry.grid(row=1, column=1)
 
+        # Parametri tolleranza flood
+        tolerance_flood_label = tk.Label(param_window, text="Tolleranza Flood:")
+        tolerance_flood_label.grid(row=2, column=0)
+        tolerance_flood_entry = tk.Entry(param_window)
+        tolerance_flood_entry.insert(0, str(self.tolerance_flood))
+        tolerance_flood_entry.grid(row=2, column=1)
+
         def update_parameters():
             try:
                 self.tolerance = [int(min_tolerance_entry.get()), int(max_tolerance_entry.get())]
                 self.filter_size = int(filter_size_entry.get())
+                self.tolerance_flood = int(tolerance_flood_entry.get())
                 param_window.destroy()
             except ValueError:
                 messagebox.showerror("Errore", "Inserisci valori numerici validi.")
 
         confirm_button = tk.Button(param_window, text="Conferma", command=update_parameters)
-        confirm_button.grid(row=2, column=0, columnspan=3)
+        confirm_button.grid(row=3, column=0, columnspan=3)
 
     def perform_watershed_segmentation(self):
         if self.image_data is None or self.label_data is None:
