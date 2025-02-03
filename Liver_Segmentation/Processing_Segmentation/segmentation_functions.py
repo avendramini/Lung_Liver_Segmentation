@@ -6,60 +6,70 @@ import cv2
 from collections import deque
 
 def watershed_segmentation(slice_data, tolerance=(90, 200), filter_size=4):
-    # Filtro mediano
+    # Apply median filter to the input slice data
     filtered_image = median_filter(slice_data, size=filter_size)
 
-    # Crea una maschera con 1 solo nei pixel nel range di tolleranza
+    # Create a mask with pixels within the tolerance range
     mask = (filtered_image >= tolerance[0]) & (filtered_image <= tolerance[1])
 
-    # Standardizza senza contare i pixel fuori dalla maschera
+    # Standardize the filtered image without considering pixels outside the mask
     standardized_filtered_image = np.where(mask, (filtered_image - np.mean(filtered_image[mask])) / np.std(filtered_image[mask]), -1000)
 
-    # Normalizzazione in [0, 255]
+    # Normalize the standardized image to [0, 255]
     grayscale_image = ((standardized_filtered_image - np.min(standardized_filtered_image)) / (np.max(standardized_filtered_image) - np.min(standardized_filtered_image)) * 255).astype(np.uint8)
+    
+    # Apply binary thresholding
     ret, bin_img = cv2.threshold(grayscale_image, 0, 255, cv2.THRESH_BINARY)
+    
     # Fill holes inside objects
     bin_img = binary_fill_holes(bin_img).astype(np.uint8) * 255
 
+    # Morphological operations to clean up the binary image
     kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (5, 5))
     bin_img = cv2.morphologyEx(bin_img, cv2.MORPH_OPEN, kernel, iterations=1)
     sure_bg = cv2.dilate(bin_img, kernel, iterations=1)
+    
+    # Distance transform and thresholding to find sure foreground
     dist = cv2.distanceTransform(bin_img, cv2.DIST_L2, 3)
     ret, sure_fg = cv2.threshold(dist, 0.5 * dist.max(), 255, cv2.THRESH_BINARY)
     sure_fg = sure_fg.astype(np.uint8)
+    
+    # Identify unknown regions
     unknown = cv2.subtract(sure_bg, sure_fg)
+    
+    # Marker labelling
     ret, markers = cv2.connectedComponents(sure_fg)
     markers += 1
-    
-    # Mark the region of unknown with zero
     markers[unknown == 255] = 0
+    
+    # Apply watershed algorithm
     color_img = cv2.cvtColor(grayscale_image, cv2.COLOR_GRAY2BGR)
     markers = cv2.watershed(color_img, markers)
 
-
+    # Find the largest region
     n_mark = np.max(markers)
-
     vettore_aree = [(np.sum(markers == i), i) for i in range(n_mark + 1)]
     coppia = max(vettore_aree, key=lambda x: x[0])
     
+    # Create a new mask for the largest region
     new_mask = np.ones(markers.shape)
     new_mask[markers == coppia[1]] = 0
     
+    # Find the largest connected component in the new mask
     num_labels, labels_im = cv2.connectedComponents(new_mask.astype(np.uint8))
     sizes = np.bincount(labels_im.ravel())
-    sizes[0] = 0  # Background size to zero
+    sizes[0] = 0  # Set background size to zero
     largest_label = sizes.argmax()
     new_mask = (labels_im == largest_label).astype(np.uint8)
-
 
     return new_mask
 
 def exploration_segmentation(slice_data, label_slice, tolerance=(90, 200), filter_size=4, max_voxel_exploration=100000):
-    # Filtro mediano
+    # Apply median filter to the input slice data
     filtered_image = median_filter(slice_data, size=filter_size)
     mask2 = (filtered_image > tolerance[0]) & (filtered_image < tolerance[1])
 
-    # BFS per propagare la maschera
+    # Initialize new mask and visited array
     new_mask = np.zeros_like(slice_data, dtype=np.uint8)
     vis = np.zeros_like(slice_data, dtype=bool)
 
@@ -87,11 +97,11 @@ def exploration_segmentation(slice_data, label_slice, tolerance=(90, 200), filte
                     queue.append((nx, ny))
                     explored_voxels += 1
 
-    # Select a random seed point from the true label mask (red one)
+    # Select random seed points from the true label mask
     seed_points = np.array(np.where(label_slice)).T
     
     if len(seed_points) == 0:
-        raise ValueError("Nessun seed point trovato nella maschera vera.")
+        raise ValueError("No seed points found in the true mask.")
 
     random_seeds = []
     for i in range(3):
@@ -99,61 +109,40 @@ def exploration_segmentation(slice_data, label_slice, tolerance=(90, 200), filte
         if mask2[seed[0], seed[1]]:
             random_seeds.append(seed)
     bfs(random_seeds, vis)
-    """# Chiudi tutti i buchi nella maschera finale
-    import matplotlib.pyplot as plt
 
-    # Plot the original slice data
-    plt.figure(figsize=(12, 6))
-    plt.subplot(1, 3, 1)
-    plt.title("Original Slice Data")
-    plt.imshow(slice_data, cmap='gray')
-    plt.axis('off')
-
-    # Plot the mask before filling holes
-    plt.subplot(1, 3, 2)
-    plt.title("Mask Before Filling Holes")
-    plt.imshow(new_mask, cmap='gray')
-    plt.axis('off')"""
-
-    # Chiudi tutti i buchi nella maschera finale
+    # Fill holes in the final mask
     filled_mask = binary_fill_holes(new_mask)
 
-    # Plot the filled mask
-    """plt.subplot(1, 3, 3)
-    plt.title("Filled Mask After Segmentation")
-    plt.imshow(filled_mask, cmap='gray')
-    plt.axis('off')
-
-    plt.show()"""
     return filled_mask
     
 def flood_segmentation(slice_data, label_slice, tolerance=(90, 200), tolerance_flood=30, filter_size=4):
-
+    # Apply median filter to the input slice data
     filtered_image = median_filter(slice_data, size=filter_size)
 
+    # Apply tolerance filter to the image
     filtered_image = np.where((filtered_image >= tolerance[0]) & (filtered_image <= tolerance[1]), filtered_image, -1000)
-
     mask2 = (filtered_image >= tolerance[0]) & (filtered_image <= tolerance[1])
 
-    # Trova i contorni
+    # Find boundaries of the mask
     boundaries = find_boundaries(mask2, mode='inner')
 
-    # Dilata i contorni per creare una maschera di esclusione
+    # Dilate boundaries to create an exclusion mask
     exclusion_mask = binary_dilation(boundaries)
 
-    # Flood fill per propagare la maschera senza oltrepassare i contorni
+    # Initialize new mask
     new_mask = np.zeros_like(slice_data, dtype=np.uint8)
 
-    # Select a random seed point from the true label mask (red one)
+    # Select random seed points from the true label mask
     seed_points = np.array(np.where(label_slice)).T
     
     if len(seed_points) == 0:
-        raise ValueError("Nessun seed point trovato nella maschera vera.")
+        raise ValueError("No seed points found in the true mask.")
+    
     # Ensure seed points are within the mask2 region
     valid_seed_points = seed_points[mask2[seed_points[:, 0], seed_points[:, 1]]]
 
     if len(valid_seed_points) == 0:
-        raise ValueError("Nessun seed point valido trovato nella maschera filtrata.")
+        raise ValueError("No valid seed points found in the filtered mask.")
 
     flooded_masks = []
     for _ in range(3):
@@ -168,9 +157,9 @@ def flood_segmentation(slice_data, label_slice, tolerance=(90, 200), tolerance_f
     for mask in flooded_masks:
         combined_mask = combined_mask | mask
 
-    # Applica la maschera di esclusione
+    # Apply exclusion mask
     new_mask = np.where(exclusion_mask, 0, flooded)
 
-    # Applica binary filling alla maschera trovata
+    # Fill holes in the found mask
     filled_mask = binary_fill_holes(new_mask)
     return filled_mask
