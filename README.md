@@ -75,7 +75,7 @@ To use the GUI for liver segmentation, run the [Combined_Segmentation_GUI.py](Li
 #### U-Net Segmentation
 To use the U-Net segmentation, follow the instructions in the [Unet_Liver.ipynb](Liver_Segmentation/Unet_Segmentation/Unet_Liver.ipynb) notebook.
 
-The weights of some pre-trained U-Net models are available in the [Results](Results) folder. These weights can be used to perform liver segmentation without the need for retraining the models.
+The weights of some pre-trained U-Net models are available in the [Results](Liver_Segmentation/Unet_Segmentation/Results) folder. These weights can be used to perform liver segmentation without the need for retraining the models.
 
 ## Performance Metrics
 
