@@ -16,7 +16,7 @@ The liver segmentation code is available in the [Liver_Segmentation](Liver_Segme
 
 These approaches are implemented in the [Processing_Segmentation](Liver_Segmentation/Processing_Segmentation) folder. The file [segmentation_functions.py](Liver_Segmentation/Processing_Segmentation/segmentation_functions.py) contains the three functions for segmentation. The file [Combined_Segmentation_GUI.py](Liver_Segmentation/Processing_Segmentation/Combined_Segmentation_GUI.py) provides a GUI for conducting segmentation on medical images.
 
-<img src="Miscellaneous/gui.png" alt="Segmentation GUI" width="500"/>
+<img src="Miscellaneous/GUI.png" alt="Segmentation GUI" width="500"/>
 
 
 ### U-Net
