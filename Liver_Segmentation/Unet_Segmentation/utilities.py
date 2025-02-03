@@ -61,7 +61,7 @@ def prepare(in_dir, pixdim=(1.5, 1.5, 1.0), a_min=-200, a_max=200, spatial_size=
         ]
     )
 
-    # Create datasets and dataloaders with caching if enabled
+    
     if cache:
         train_ds = CacheDataset(data=train_files, transform=train_transforms, cache_rate=1.0)
         train_loader = DataLoader(train_ds, batch_size=1)
@@ -82,18 +82,6 @@ def dice_metric(predicted, target):
     dice_value = DiceLoss(to_onehot_y=True, sigmoid=True, squared_pred=True)
     value = 1 - dice_value(predicted, target).item()
     return value
-
-def calculate_weights(val1, val2):
-    '''
-    Calculate weights for cross-entropy loss based on the number of background and foreground pixels.
-    '''
-    count = np.array([val1, val2])
-    summ = count.sum()
-    weights = count / summ
-    weights = 1 / weights
-    summ = weights.sum()
-    weights = weights / summ
-    return torch.tensor(weights, dtype=torch.float32)
 
 def train(model, data_in, loss, optim, max_epochs, model_dir, test_interval=1, device=torch.device("cuda:0")):
     # Initialize variables to track the best metric and epoch
@@ -176,44 +164,3 @@ def train(model, data_in, loss, optim, max_epochs, model_dir, test_interval=1, d
 
     print(f"train completed, best_metric: {best_metric:.4f} at epoch: {best_metric_epoch}")
 
-def show_patient(data, SLICE_NUMBER=1, train=True, test=False):
-    """
-    Visualize a patient from the dataset to check the data quality and transformations.
-    """
-    check_patient_train, check_patient_test = data
-    view_train_patient = first(check_patient_train)
-    view_test_patient = first(check_patient_test)
-
-    if train:
-        plt.figure("Visualization Train", (12, 6))
-        plt.subplot(1, 2, 1)
-        plt.title(f"vol {SLICE_NUMBER}")
-        plt.imshow(view_train_patient["vol"][0, 0, :, :, SLICE_NUMBER], cmap="gray")
-        plt.subplot(1, 2, 2)
-        plt.title(f"seg {SLICE_NUMBER}")
-        plt.imshow(view_train_patient["seg"][0, 0, :, :, SLICE_NUMBER])
-        plt.show()
-
-    if test:
-        plt.figure("Visualization Test", (12, 6))
-        plt.subplot(1, 2, 1)
-        plt.title(f"vol {SLICE_NUMBER}")
-        plt.imshow(view_test_patient["vol"][0, 0, :, :, SLICE_NUMBER], cmap="gray")
-        plt.subplot(1, 2, 2)
-        plt.title(f"seg {SLICE_NUMBER}")
-        plt.imshow(view_test_patient["seg"][0, 0, :, :, SLICE_NUMBER])
-        plt.show()
-
-def calculate_pixels(data):
-    """
-    Calculate the number of background and foreground pixels in the dataset.
-    """
-    val = np.zeros((1, 2))
-    for batch in tqdm(data):
-        batch_label = batch["seg"] != 0
-        _, count = np.unique(batch_label, return_counts=True)
-        if len(count) == 1:
-            count = np.append(count, 0)
-        val += count
-    print('The last values:', val)
-    return val
