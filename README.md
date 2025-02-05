@@ -1,7 +1,7 @@
 # Lung & Liver Segmentation
 
 This project was developed as part of the Signal, Image, and Video course for the Master's Degree in Artificial Intelligence Systems at the University of Trento. The goal of this project is to perform segmentation of the lungs and liver in medical images using various image analysis techniques.
-
+For a more detailed and theoretical description of the techniques used, please refer to the [Report.pdf](Report.pdf).
 ## Lung Segmentation
 
 The lung segmentation code is available in the notebook [Lung_segmentation.ipynb](Lung_Segmentation/lung_segmentation.ipynb).
