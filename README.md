@@ -77,6 +77,26 @@ To use the U-Net segmentation, follow the instructions in the [Unet_Liver.ipynb]
 
 The weights of some pre-trained U-Net models are available in the [Results](Liver_Segmentation/Unet_Segmentation/Results) folder. These weights can be used to perform liver segmentation without the need for retraining the models.
 
+## Data
+
+### Lung Segmentation
+Place the volumes in:
+- Lung_data\Volumes  
+and the corresponding labels in:
+- Lung_data\Labels  
+
+### Processing Segmentation
+Place the files in:
+- Liver_CT  
+with CT images in:
+- imagesTr  
+and the labels in:
+- labelsTr  
+
+### U-Net
+Place the already split data within the subfolders of:
+- Data
+
 ## Performance Metrics
 
 ### Lung Segmentation
