@@ -29,7 +29,7 @@ class MedicalImageViewerApp:
         self.last_segmentation = None
 
         # Parametri di segmentazione
-        self.tolerance = [50,200]  # Tolleranza predefinita
+        self.tolerance = [90,200]  # Tolleranza predefinita
         self.filter_size = 4         # Filtro mediano di dimensione predefinita
         self.max_voxel_exploration = 100000  # Limite massimo di voxel esplorabili
         self.tolerance_flood = 30
